@@ -34,64 +34,80 @@ class NewMedWindow(QWidget):
 
         # medication name
         row_med_name = QFormLayout()
-        lbl_name = QLabel("Medication name")
-        txt_name = QLineEdit()
-        row_med_name.addRow(lbl_name, txt_name)
+        self.lbl_name = QLabel("Medication name")
+        self.txt_name = QLineEdit()
+        row_med_name.addRow(self.lbl_name, self.txt_name)
         wrapper.addLayout(row_med_name)
 
         # medication strength
         # quantity in
         row_strength = QHBoxLayout()
-        lbl_strength = QLabel("Strength")
-        txt_strength = IntInput()
-        txt_strength.setMinimumWidth(100)
-        cbo_strength_unit = QComboBox()
+        self.lbl_strength = QLabel("Strength")
+        self.txt_strength = IntInput()
+        self.txt_strength.setMinimumWidth(100)
+        self.cbo_strength_unit = QComboBox()
         for unit in cfg.valid_strength_units:
-            cbo_strength_unit.addItem(unit)
-        cbo_strength_unit.setMaximumWidth(50)
-        lbl_qty = QLabel("Qty In")
-        txt_qty = QLineEdit()
-        row_strength.addWidget(lbl_strength)
-        row_strength.addWidget(txt_strength)
-        row_strength.addWidget(cbo_strength_unit)
-        row_strength.addWidget(lbl_qty)
-        row_strength.addWidget(txt_qty)
+            self.cbo_strength_unit.addItem(unit)
+        self.cbo_strength_unit.setMaximumWidth(50)
+        self.lbl_qty = QLabel("Qty In")
+        self.txt_qty = QLineEdit()
+        row_strength.addWidget(self.lbl_strength)
+        row_strength.addWidget(self.txt_strength)
+        row_strength.addWidget(self.cbo_strength_unit)
+        row_strength.addWidget(self.lbl_qty)
+        row_strength.addWidget(self.txt_qty)
         wrapper.addLayout(row_strength)
 
         # dosage
         row_dosage = QHBoxLayout()
-        lbl_dosage = QLabel("Dosage")
-        cbo_dosage_type = QComboBox()
+        self.lbl_dosage = QLabel("Dosage")
+        self.cbo_dosage_type = QComboBox()
         for type in cfg.freqs:
-            cbo_dosage_type.addItem(cfg.freqs[type])
-        txt_i = IntInput("i")
-        txt_n = IntInput("n")
-        row_dosage.addWidget(lbl_dosage)
-        row_dosage.addWidget(cbo_dosage_type)
-        row_dosage.addWidget(txt_i)
-        row_dosage.addWidget(txt_n)
+            self.cbo_dosage_type.addItem(cfg.freqs[type])
+        self.txt_i = IntInput("i")
+        self.txt_n = IntInput("n")
+        row_dosage.addWidget(self.lbl_dosage)
+        row_dosage.addWidget(self.cbo_dosage_type)
+        row_dosage.addWidget(self.txt_i)
+        row_dosage.addWidget(self.txt_n)
         wrapper.addLayout(row_dosage)
 
         # statement
         row_statement = QHBoxLayout()
-        dosage_statement = QLabel("...")
-        dosage_statement.setMinimumWidth(300)
-        dosage_statement.setAlignment(Qt.AlignHCenter)
-        btn_check = QPushButton("Check")
-        btn_check.setMaximumWidth(150)
-        row_statement.addWidget(dosage_statement)
-        row_statement.addWidget(btn_check)
+        self.dosage_statement = QLabel("...")
+        self.dosage_statement.setMinimumWidth(300)
+        self.dosage_statement.setAlignment(Qt.AlignHCenter)
+        self.btn_validate = QPushButton("Check")
+        self.btn_validate.setMaximumWidth(150)
+        self.btn_validate.clicked.connect(self.validate_clicked)
+        row_statement.addWidget(self.dosage_statement)
+        row_statement.addWidget(self.btn_validate)
         wrapper.addLayout(row_statement)
 
         # submit
         row_buttons = QHBoxLayout()
-        btn_reset = QPushButton("Reset")
-        btn_submit = QPushButton("Submit")
-        row_buttons.addWidget(btn_reset)
-        row_buttons.addWidget(btn_submit)
+        self.btn_reset = QPushButton("Reset")
+        self.btn_submit = QPushButton("Submit")
+        self.btn_submit.setEnabled(False)  # disable until data validates
+        row_buttons.addWidget(self.btn_reset)
+        row_buttons.addWidget(self.btn_submit)
         wrapper.addLayout(row_buttons)
 
-        self.setLayout(wrapper)
+    def validate_clicked(self):
+        is_input_valid = False
+        # validate medication name
+        # validate strength
+        # validate dosage
+        # validate qty in
+
+        if is_input_valid:
+            self.btn_submit.setEnabled(True)
+
+    def reset_clicked(self):
+        pass
+
+    def submit_clicked(self):
+        pass
 
 
 def main():
