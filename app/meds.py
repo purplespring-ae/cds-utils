@@ -19,7 +19,8 @@ from config import *
 class Medication():
     def __init__(self, name, strength_val, strength_unit, dtype, n, i, qty_in, timing=None):
         self.name = self.valid_name(name)
-        self.strength_val = self.valid_strength(strength_val)
+        # self.strength_val = self.valid_strength(strength_val) # deprecated to allow for eg Vit B Strong
+        self.strength_val = strength_val
         # self.strength_unit = self.valid_strength_unit(strength_unit)
         self.strength_unit = strength_unit if strength_unit in valid_strength_units else ValueError(
             f"Strength unit must be in {valid_strength_units}. {SUGGEST_MANUAL}")
@@ -37,14 +38,14 @@ class Medication():
         else:
             raise ValueError("Medication name must be a string.")
 
-    def valid_strength(self, strength_val):
-        if isinstance(strength_val, int) or isinstance(strength_val, float):
-            # print(
-            #    f"Medication strength value of {strength_val} is accepted and set.")
-            return strength_val
-        else:
-            raise ValueError(
-                "Medication strength must be an integer or float (decimal).")
+    # def valid_strength(self, strength_val):
+    #     if isinstance(strength_val, int) or isinstance(strength_val, float) or not strength_val:
+    #         # print(
+    #         #    f"Medication strength value of {strength_val} is accepted and set.")
+    #         return strength_val
+    #     else:
+    #         raise ValueError(
+    #             "Medication strength must be an integer or float (decimal).")
 
     def report(self, out=False):
         process = "out" if out else "in"
