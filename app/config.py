@@ -14,19 +14,6 @@ freqs = {"i_n_per_day": "Take [i], [n] times per day.",
 valid_strength_units = ["mg", "ml", None]
 valid_timings = ["morning", "night"]
 
-freq_dicts = [
-    {"statement": "Take [i], [n] times per day.",
-     "has_i": True,
-     "has_n": True},
-    {"statement": "Take [i] as needed up to [n] times per day.",
-     "has_i": True,
-     "has_n": True},
-    {"statement": "Take according to regime.",
-     "has_i": False,
-     "has_n": False}
-
-]
-
 list_freqs = [
     "Take [i], [n] times per day.",
     "Take [i] as needed up to [n] times per day.",

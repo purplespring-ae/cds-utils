@@ -29,6 +29,8 @@ class NewMedWindow(QWidget):
         self.initUI()
 
     def initUI(self):
+        # TODO: Separate sections to individual methods for readability
+        # TODO: Split off elements that will be used for other windows
         # wrapper for entire form
         wrapper = QVBoxLayout()
         self.setLayout(wrapper)
@@ -64,28 +66,35 @@ class NewMedWindow(QWidget):
         row_dosage_options = QVBoxLayout()
         self.lbl_dosage = QLabel("Dosage")
         row_dosage_options.addWidget(self.lbl_dosage)
+        options_container = QHBoxLayout()
+        dosage_radio_container = QVBoxLayout()
+        dosage_radio_group = QButtonGroup()
+        dosage_i_n_container = QVBoxLayout()
         for type in cfg.list_freqs:
-            this_type_row = QHBoxLayout()
-            radio_option = QRadioButton(type)
-            # TODO: connect to event which sets self.dosage_type
-            radio_option.toggled.connect(
-                lambda: self.set_dosage_option(radio_option))
-            this_type_row.addWidget(radio_option)
-
-            # add needed LineEdit widgets for i, n
+            # add radio to button group
+            radio = QRadioButton(type)
+            dosage_radio_group.addButton(radio)
+            dosage_radio_container.addWidget(radio)
+            # radio.toggled.connect(lambda: self.foo())
+            # add i, n as needed to container
+            this_row_i_n = QHBoxLayout()
             if "[i]" in type:
                 txt_i = IntInput("i")
                 txt_i.setEnabled(False)
-                this_type_row.addWidget(txt_i)
+                this_row_i_n.addWidget(txt_i)
             if "[n]" in type:
                 txt_n = IntInput("n")
                 txt_n.setEnabled(False)
-                this_type_row.addWidget(txt_n)
-            row_dosage_options.addLayout(this_type_row)
-        custom_dosage = QLineEdit()
-        custom_dosage.setPlaceholderText("Custom dosage (Caution!)")
-        row_dosage_options.addWidget(custom_dosage)
-
+                this_row_i_n.addWidget(txt_n)
+            if "[i]" not in type and "[n]" not in type:
+                # add placeholder row to allow options & text to line up
+                spacer = QSpacerItem(20, 20)
+                this_row_i_n.addSpacerItem(spacer)
+            dosage_i_n_container.addLayout(this_row_i_n)
+        # TODO: custom-typed dosage
+        options_container.addLayout(dosage_radio_container)
+        options_container.addLayout(dosage_i_n_container)
+        row_dosage_options.addLayout(options_container)
         wrapper.addLayout(row_dosage_options)
 
         # statement
