@@ -16,10 +16,10 @@ class IntInput(QLineEdit):
         self.setAlignment(Qt.AlignHCenter)
 
 
-class RadioExclusiveLineEdit(QLineEdit):
-    def __init__(self, *args, **kwargs):
-        super(QLineEdit, self).__init__(*args, **kwargs)
-        self.setEnabled = False
+# class RadioExclusiveLineEdit(QLineEdit):
+#     def __init__(self, *args, **kwargs):
+#         super(QLineEdit, self).__init__(*args, **kwargs)
+#         self.setEnabled = False
 
 
 class NewMedWindow(QWidget):
@@ -40,6 +40,7 @@ class NewMedWindow(QWidget):
         def row_strength_qty():
             row_strength = QHBoxLayout()
             self.lbl_strength = QLabel("Strength")
+            self.lbl_strength.setAlignment(Qt.AlignRight)
             self.txt_strength = IntInput()
             self.txt_strength.setMinimumWidth(100)
             self.cbo_strength_unit = QComboBox()
@@ -47,7 +48,8 @@ class NewMedWindow(QWidget):
                 self.cbo_strength_unit.addItem(unit)
             self.cbo_strength_unit.setMaximumWidth(50)
             self.lbl_qty = QLabel("Qty In")
-            self.txt_qty = QLineEdit()
+            self.lbl_qty.setAlignment(Qt.AlignRight)
+            self.txt_qty = IntInput()
             row_strength.addWidget(self.lbl_strength)
             row_strength.addWidget(self.txt_strength)
             row_strength.addWidget(self.cbo_strength_unit)
@@ -72,7 +74,7 @@ class NewMedWindow(QWidget):
                 self.dosage_options_grp.addButton(opt1_radio)
                 opt1.addWidget(opt1_radio)
                 # '' txt_i
-                self.opt1_txt_i = QLineEdit()
+                self.opt1_txt_i = IntInput("i")
                 self.opt1_txt_i.setPlaceholderText("i")
                 self.opt1_txt_i.setObjectName("opt1_txt_i")
                 opt1.addWidget(self.opt1_txt_i)
@@ -80,7 +82,7 @@ class NewMedWindow(QWidget):
                 lbl = QLabel(", ")
                 opt1.addWidget(lbl)
                 # '' txt_n
-                self.opt1_txt_n = QLineEdit()
+                self.opt1_txt_n = IntInput("n")
                 self.opt1_txt_n.setPlaceholderText("n")
                 self.opt1_txt_n.setEnabled(False)
                 self.opt1_txt_n.setObjectName("opt1_txt_n")
@@ -90,6 +92,10 @@ class NewMedWindow(QWidget):
                 # add textlines to list for easy mass disable/enable
                 self.list_exclusive_txtlines.append(self.opt1_txt_n)
                 self.list_exclusive_txtlines.append(self.opt1_txt_i)
+                # set alignment
+                for widget in opt1.children():
+                    print(widget)
+                    widget.setAlignment(Qt.AlignLeft)
                 return opt1
 
             def opt2():
@@ -100,7 +106,7 @@ class NewMedWindow(QWidget):
                 self.dosage_options_grp.addButton(opt2_radio)
                 opt2.addWidget(opt2_radio)
                 # '' txt_i
-                self.opt2_txt_i = QLineEdit()
+                self.opt2_txt_i = IntInput("i")
                 self.opt2_txt_i.setPlaceholderText("i")
                 self.opt2_txt_i.setObjectName("opt2_txt_i")
                 opt2.addWidget(self.opt2_txt_i)
@@ -108,7 +114,7 @@ class NewMedWindow(QWidget):
                 lbl = QLabel(" as needed up to ")
                 opt2.addWidget(lbl)
                 # '' txt_n
-                self.opt2_txt_n = QLineEdit()
+                self.opt2_txt_n = IntInput("n")
                 self.opt2_txt_n.setPlaceholderText("n")
                 self.opt2_txt_n.setEnabled(False)
                 self.opt2_txt_n.setObjectName("opt2_txt_n")
@@ -214,6 +220,7 @@ class NewMedWindow(QWidget):
                     # clear & disable unselected txt input
                     # TODO: create class & method for toggleable txt inputs to avoid replicating code between options
                     self.opt1_txt_n.setEnabled(True)
+
                     self.active_n = self.opt1_txt_n
                     self.opt1_txt_i.setEnabled(True)
                     self.active_i = self.opt1_txt_i
@@ -246,8 +253,12 @@ class NewMedWindow(QWidget):
                     self.opt1_txt_i.setEnabled(False)
                     self.opt4_txt.setEnabled(False)
                 elif radio_i == 3:
+                    self.active_n = None
+                    self.active_i = None
                     self.dosage_statement.setText(self.dosage_option)
                 elif radio_i == 4:
+                    self.active_n = None
+                    self.active_i = None
                     self.opt4_txt.setEnabled(True)
                     statement_str = self.opt4_txt.text() if len(
                         self.opt4_txt.text()) != 0 else "[BLANK: custom dosage/frequency]"
@@ -263,29 +274,34 @@ class NewMedWindow(QWidget):
         self.dosage_statement.setText(self.dosage_option + statement_str)
 
     def btn_clicked_validate(self):
-        # fields for validation which are always active
-        valid_data = {
+        valid_data = {  # add fields which are always active
             self.txt_name: False,
             self.txt_strength: False,
             self.txt_qty: False,
-            self.active_i: False,
-            self.active_n: False
         }
-        # add to dict active, exclusive fields
-        for txt in self.list_exclusive_txtlines:
-            if txt.isEnabled() and txt.text():
-                print(txt.text())
-                if txt.objectName()[:-1] == "i":
-                    # work with self.active_i
-                    pass
-                elif txt.objectName()[:-1] == "n":
-                    # work with self.active_n
-                    pass
-                else:
-                    raise ValueError
-                # valid_data.update#(self.foo: False)
+        # add to dict fields which may or may not be active
+        opt_str = self.dosage_options_grp.checkedButton().statusTip(
+        ) if self.dosage_options_grp.checkedButton() else ""
+        if "[n]" in opt_str or "[i]" in opt_str:
+            # active_n and active_i are set, get which ones
+            for txt in self.list_exclusive_txtlines:
+                if txt.isEnabled() and txt.placeholderText == "n":
+                    self.active_n = txt
+                    valid_data.update({self.active_n: False})
+                elif txt.isEnabled() and txt.placeholderText == "i":
+                    self.active_i = txt
+                    valid_data.update({self.active_i: False})
+        elif self.dosage_options_grp.checkedButton():
+            # option 3 or 4. n text fields to validate
+            print("No text fields active needing validation.")
+        else:
+            # no dosage selected, skip validation
+            return False
 
         # validate medication name
+        if self.txt_name.text():
+            valid_data.update({self.txt_name, True})
+            print("Validated data.")
         # validate strength
         # validate dosage
             # validate i
