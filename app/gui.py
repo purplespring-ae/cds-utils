@@ -62,7 +62,6 @@ class NewMedWindow(QWidget):
             # TODO: procedural rows from cfg.lst_freqs. for now, hard-coded
             # options
             self.dosage_options_grp = QButtonGroup()
-            list_exclusive_txtlines = []
 
             def opt1():
                 opt_str = "Take [i], [n] times per day."
@@ -75,6 +74,7 @@ class NewMedWindow(QWidget):
                 # '' txt_i
                 self.opt1_txt_i = QLineEdit()
                 self.opt1_txt_i.setPlaceholderText("i")
+                self.opt1_txt_i.setObjectName("opt1_txt_i")
                 opt1.addWidget(self.opt1_txt_i)
                 # '' ", " label
                 lbl = QLabel(", ")
@@ -83,12 +83,13 @@ class NewMedWindow(QWidget):
                 self.opt1_txt_n = QLineEdit()
                 self.opt1_txt_n.setPlaceholderText("n")
                 self.opt1_txt_n.setEnabled(False)
+                self.opt1_txt_n.setObjectName("opt1_txt_n")
                 opt1.addWidget(self.opt1_txt_n)
                 lbl = QLabel(" times per day.")
                 opt1.addWidget(lbl)
                 # add textlines to list for easy mass disable/enable
-                list_exclusive_txtlines.append(self.opt1_txt_n)
-                list_exclusive_txtlines.append(self.opt1_txt_i)
+                self.list_exclusive_txtlines.append(self.opt1_txt_n)
+                self.list_exclusive_txtlines.append(self.opt1_txt_i)
                 return opt1
 
             def opt2():
@@ -101,6 +102,7 @@ class NewMedWindow(QWidget):
                 # '' txt_i
                 self.opt2_txt_i = QLineEdit()
                 self.opt2_txt_i.setPlaceholderText("i")
+                self.opt2_txt_i.setObjectName("opt2_txt_i")
                 opt2.addWidget(self.opt2_txt_i)
                 # '' ", " label
                 lbl = QLabel(" as needed up to ")
@@ -109,12 +111,13 @@ class NewMedWindow(QWidget):
                 self.opt2_txt_n = QLineEdit()
                 self.opt2_txt_n.setPlaceholderText("n")
                 self.opt2_txt_n.setEnabled(False)
+                self.opt2_txt_n.setObjectName("opt2_txt_n")
                 opt2.addWidget(self.opt2_txt_n)
                 lbl = QLabel(" times per day.")
                 opt2.addWidget(lbl)
                 # add textlines to list for easy mass disable/enable
-                list_exclusive_txtlines.append(self.opt2_txt_n)
-                list_exclusive_txtlines.append(self.opt2_txt_i)
+                self.list_exclusive_txtlines.append(self.opt2_txt_n)
+                self.list_exclusive_txtlines.append(self.opt2_txt_i)
                 return opt2
 
             def opt3():
@@ -138,7 +141,7 @@ class NewMedWindow(QWidget):
                     "Caution - use the preset options where possible.")
                 self.opt4_txt.setEnabled(False)
                 opt4.addWidget(self.opt4_txt)
-                list_exclusive_txtlines.append(self.opt4_txt)
+                self.list_exclusive_txtlines.append(self.opt4_txt)
                 return opt4
 
             # BUILD AND ADD ROWS
@@ -148,7 +151,7 @@ class NewMedWindow(QWidget):
             row_inline_dosage_container.addLayout(opt4())
 
             # connect to handlers and prepare controls
-            for txt in list_exclusive_txtlines:
+            for txt in self.list_exclusive_txtlines:
                 txt.setEnabled(False)
                 txt.textChanged.connect(lambda: self.option_dosage_changed())
 
@@ -183,6 +186,7 @@ class NewMedWindow(QWidget):
         # wrapper for entire form
         wrapper = QVBoxLayout()
         self.setLayout(wrapper)
+        self.list_exclusive_txtlines = []
 
         wrapper.addLayout(row_medication())
         wrapper.addLayout(row_strength_qty())
@@ -210,7 +214,9 @@ class NewMedWindow(QWidget):
                     # clear & disable unselected txt input
                     # TODO: create class & method for toggleable txt inputs to avoid replicating code between options
                     self.opt1_txt_n.setEnabled(True)
+                    self.active_n = self.opt1_txt_n
                     self.opt1_txt_i.setEnabled(True)
+                    self.active_i = self.opt1_txt_i
                     self.opt2_txt_n.clear()
                     self.opt2_txt_i.clear()
                     self.opt4_txt.clear()
@@ -230,7 +236,9 @@ class NewMedWindow(QWidget):
                     self.dosage_statement.setText(statement_str)
                     # clear & disable unselected txt input
                     self.opt2_txt_n.setEnabled(True)
+                    self.active_n = self.opt2_txt_n
                     self.opt2_txt_i.setEnabled(True)
+                    self.active_i = self.opt2_txt_i
                     self.opt1_txt_n.clear()
                     self.opt1_txt_i.clear()
                     self.opt4_txt.clear()
@@ -254,18 +262,34 @@ class NewMedWindow(QWidget):
             self.opt4_txt.text()) != 0 else "[BLANK: custom dosage/frequency]"
         self.dosage_statement.setText(self.dosage_option + statement_str)
 
-    def refresh_statement(self):
-        self.option_dosage_changed()
-
     def btn_clicked_validate(self):
-        valid_data = {  # no need to validate fields derived from config.py
+        # fields for validation which are always active
+        valid_data = {
             self.txt_name: False,
             self.txt_strength: False,
-            self.txt_qty: False
+            self.txt_qty: False,
+            self.active_i: False,
+            self.active_n: False
         }
+        # add to dict active, exclusive fields
+        for txt in self.list_exclusive_txtlines:
+            if txt.isEnabled() and txt.text():
+                print(txt.text())
+                if txt.objectName()[:-1] == "i":
+                    # work with self.active_i
+                    pass
+                elif txt.objectName()[:-1] == "n":
+                    # work with self.active_n
+                    pass
+                else:
+                    raise ValueError
+                # valid_data.update#(self.foo: False)
+
         # validate medication name
         # validate strength
         # validate dosage
+            # validate i
+            # validate n
         # validate qty in
 
         # aggregate validation
