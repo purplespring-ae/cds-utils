@@ -1,3 +1,4 @@
+from types import NoneType
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -59,21 +60,24 @@ class NewMedWindow(QWidget):
         wrapper.addLayout(row_strength)
 
         # alternative dosage - radio boxes
+        # TODO: implement QButtonGroup to allow use of .checkedButton()
         row_dosage_options = QVBoxLayout()
-        self.lbl_dosage2 = QLabel("Dosage")
-        row_dosage_options.addWidget(self.lbl_dosage2)
+        self.lbl_dosage = QLabel("Dosage")
+        row_dosage_options.addWidget(self.lbl_dosage)
         for type in cfg.list_freqs:
             this_type_row = QHBoxLayout()
-            radio = QRadioButton(type)
-            this_type_row.addWidget(radio)
+            radio_option = QRadioButton(type)
+            # TODO: connect to event which sets self.dosage_type
+            radio_option.toggled.connect(
+                lambda: self.set_dosage_option(radio_option))
+            this_type_row.addWidget(radio_option)
+
             # add needed LineEdit widgets for i, n
             if "[i]" in type:
-                # needs_i = True
                 txt_i = IntInput("i")
                 txt_i.setEnabled(False)
                 this_type_row.addWidget(txt_i)
             if "[n]" in type:
-                # needs_n = True
                 txt_n = IntInput("n")
                 txt_n.setEnabled(False)
                 this_type_row.addWidget(txt_n)
@@ -81,6 +85,7 @@ class NewMedWindow(QWidget):
         custom_dosage = QLineEdit()
         custom_dosage.setPlaceholderText("Custom dosage (Caution!)")
         row_dosage_options.addWidget(custom_dosage)
+
         wrapper.addLayout(row_dosage_options)
 
         # statement
@@ -95,7 +100,7 @@ class NewMedWindow(QWidget):
         row_statement.addWidget(self.btn_validate)
         wrapper.addLayout(row_statement)
 
-        # submit
+        # submit/reset
         row_buttons = QHBoxLayout()
         self.btn_reset = QPushButton("Reset")
         self.btn_submit = QPushButton("Submit")
@@ -104,23 +109,33 @@ class NewMedWindow(QWidget):
         row_buttons.addWidget(self.btn_submit)
         wrapper.addLayout(row_buttons)
 
+    def set_dosage_option(self, option):
+        # TODO: link to radio buttons
+        self.dosage_selected = option.text()
+        print(self.dosage_selected)
+        pass
+
     def validate_clicked(self):
-        is_input_valid = False
         valid_data = {  # no need to validate fields derived from config.py
             self.txt_name: False,
             self.txt_strength: False,
             self.txt_qty: False
-
         }
         # validate medication name
         # validate strength
         # validate dosage
         # validate qty in
 
-        if is_input_valid:
+        # aggregate validation
+        count_invalid = 0
+        for field in valid_data:
+            if not valid_data[field]:
+                count_invalid += 1
+                # TODO: store field for notification of invalid input to user
+        if count_invalid != 0:
             self.btn_submit.setEnabled(True)
         else:
-            pass  # indicate issues to user
+            pass  # TODO: indicate validation issues to user
 
     def reset_clicked(self):
         pass
