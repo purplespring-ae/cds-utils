@@ -1,9 +1,9 @@
-from types import NoneType
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
 import sys
+# import re # may be needed for procedural dosage options, currently not working so import bypassed
 
 import config as cfg
 
@@ -16,10 +16,10 @@ class IntInput(QLineEdit):
         self.setAlignment(Qt.AlignHCenter)
 
 
-# class ReadOnlyTxt(QLineEdit): # gave up on this v quickly as existing QLabel is better
-#     def __init__(self, *args, **kwargs):
-#         super(QLineEdit, self).__init__(*args, **kwargs)
-#         self.isReadOnly = True
+class RadioExclusiveLineEdit(QLineEdit):
+    def __init__(self, *args, **kwargs):
+        super(QLineEdit, self).__init__(*args, **kwargs)
+        self.setEnabled = False
 
 
 class NewMedWindow(QWidget):
@@ -61,41 +61,67 @@ class NewMedWindow(QWidget):
         row_strength.addWidget(self.txt_qty)
         wrapper.addLayout(row_strength)
 
-        # alternative dosage - radio boxes
-        # TODO: implement QButtonGroup to allow use of .checkedButton()
-        row_dosage_options = QVBoxLayout()
-        self.lbl_dosage = QLabel("Dosage")
-        row_dosage_options.addWidget(self.lbl_dosage)
-        options_container = QHBoxLayout()
-        dosage_radio_container = QVBoxLayout()
-        dosage_radio_group = QButtonGroup()
-        dosage_i_n_container = QVBoxLayout()
-        for type in cfg.list_freqs:
-            # add radio to button group
-            radio = QRadioButton(type)
-            dosage_radio_group.addButton(radio)
-            dosage_radio_container.addWidget(radio)
-            # radio.toggled.connect(lambda: self.foo())
-            # add i, n as needed to container
-            this_row_i_n = QHBoxLayout()
-            if "[i]" in type:
-                txt_i = IntInput("i")
-                txt_i.setEnabled(False)
-                this_row_i_n.addWidget(txt_i)
-            if "[n]" in type:
-                txt_n = IntInput("n")
-                txt_n.setEnabled(False)
-                this_row_i_n.addWidget(txt_n)
-            if "[i]" not in type and "[n]" not in type:
-                # add placeholder row to allow options & text to line up
-                spacer = QSpacerItem(20, 20)
-                this_row_i_n.addSpacerItem(spacer)
-            dosage_i_n_container.addLayout(this_row_i_n)
-        # TODO: custom-typed dosage
-        options_container.addLayout(dosage_radio_container)
-        options_container.addLayout(dosage_i_n_container)
-        row_dosage_options.addLayout(options_container)
-        wrapper.addLayout(row_dosage_options)
+        # in-line dosage
+        row_inline_dosage_container = QVBoxLayout()
+        lbl_dosage = QLabel("Dosage:")
+        row_inline_dosage_container.addWidget(lbl_dosage)
+        # TODO: procedural rows from cfg.lst_freqs. for now, hard-coded
+        # options
+        self.dosage_options_grp = QButtonGroup()
+        # ' option "Take [i], [n] times per day."
+        # '' radio button
+        opt1 = QHBoxLayout()
+        opt1_radio = QRadioButton("Take")
+        opt1_radio.setStatusTip("Take [i], [n] times per day.")
+        self.dosage_options_grp.addButton(opt1_radio)
+        opt1.addWidget(opt1_radio)
+        # '' txt_i
+        self.opt1_txt_i = QLineEdit()
+        self.opt1_txt_i.setPlaceholderText("i")
+        opt1.addWidget(self.opt1_txt_i)
+        # '' ", " label
+        lbl = QLabel(", ")
+        opt1.addWidget(lbl)
+        # '' txt_n
+        self.opt1_txt_n = QLineEdit()
+        self.opt1_txt_n.setPlaceholderText("n")
+        opt1.addWidget(self.opt1_txt_n)
+        lbl = QLabel(" times per day.")
+        opt1.addWidget(lbl)
+        # add to row
+        row_inline_dosage_container.addLayout(opt1)
+
+        # option "Take [i] as needed up to [n] times per day."
+        opt2 = QHBoxLayout()
+        opt2_radio = QRadioButton("Take")
+        opt2_radio.setStatusTip("Take [i], [n] times per day.")
+        self.dosage_options_grp.addButton(opt2_radio)
+        opt2.addWidget(opt2_radio)
+        # '' txt_i
+        self.opt2_txt_i = QLineEdit()
+        self.opt2_txt_i.setPlaceholderText("i")
+        opt2.addWidget(self.opt2_txt_i)
+        # '' ", " label
+        lbl = QLabel(" as needed up to ")
+        opt2.addWidget(lbl)
+        # '' txt_n
+        self.opt2_txt_n = QLineEdit()
+        self.opt2_txt_n.setPlaceholderText("n")
+        opt2.addWidget(self.opt2_txt_n)
+        lbl = QLabel(" times per day.")
+        opt2.addWidget(lbl)
+        # add to row
+        row_inline_dosage_container.addLayout(opt2)
+        # option "Take according to regime."
+        opt3 = QHBoxLayout()
+        opt3_radio = QRadioButton("Take according to regime.")
+        self.dosage_options_grp.addButton(opt3_radio)
+        opt3.addWidget(opt3_radio)
+        row_inline_dosage_container.addLayout(opt3)
+        # option custom text row
+
+        # add dosage inline to page wrapper
+        wrapper.addLayout(row_inline_dosage_container)
 
         # statement
         row_statement = QHBoxLayout()
@@ -118,11 +144,10 @@ class NewMedWindow(QWidget):
         row_buttons.addWidget(self.btn_submit)
         wrapper.addLayout(row_buttons)
 
-    def set_dosage_option(self, option):
-        # TODO: link to radio buttons
-        self.dosage_selected = option.text()
-        print(self.dosage_selected)
-        pass
+    def switch_dosage(self):
+        # store value as object var
+        self.dosage_selected = self.dosage_radio_grp.checkedButton().text()
+        # enable/disable i, n txtinput
 
     def validate_clicked(self):
         valid_data = {  # no need to validate fields derived from config.py
