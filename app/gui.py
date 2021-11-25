@@ -29,143 +29,147 @@ class NewMedWindow(QWidget):
         self.initUI()
 
     def initUI(self):
-        # TODO: Separate sections to individual methods for readability
         # TODO: Split off elements that will be used for other windows
+        def row_medication():
+            row_med_name = QFormLayout()
+            self.lbl_name = QLabel("Medication name")
+            self.txt_name = QLineEdit()
+            row_med_name.addRow(self.lbl_name, self.txt_name)
+            return row_med_name
+
+        def row_strength_qty():
+            row_strength = QHBoxLayout()
+            self.lbl_strength = QLabel("Strength")
+            self.txt_strength = IntInput()
+            self.txt_strength.setMinimumWidth(100)
+            self.cbo_strength_unit = QComboBox()
+            for unit in cfg.valid_strength_units:
+                self.cbo_strength_unit.addItem(unit)
+            self.cbo_strength_unit.setMaximumWidth(50)
+            self.lbl_qty = QLabel("Qty In")
+            self.txt_qty = QLineEdit()
+            row_strength.addWidget(self.lbl_strength)
+            row_strength.addWidget(self.txt_strength)
+            row_strength.addWidget(self.cbo_strength_unit)
+            row_strength.addWidget(self.lbl_qty)
+            row_strength.addWidget(self.txt_qty)
+            return row_strength
+
+        def row_dosage():
+            row_inline_dosage_container = QVBoxLayout()
+            lbl_dosage = QLabel("Dosage:")
+            row_inline_dosage_container.addWidget(lbl_dosage)
+            # TODO: procedural rows from cfg.lst_freqs. for now, hard-coded
+            # options
+            self.dosage_options_grp = QButtonGroup()
+
+            opt_str = "Take [i], [n] times per day."
+            # '' radio button
+            opt1 = QHBoxLayout()
+            opt1_radio = QRadioButton("Take")
+            opt1_radio.setStatusTip(opt_str)
+            # opt1_radio.toggled.connect(lambda: self.option_dosage_clicked())
+            self.dosage_options_grp.addButton(opt1_radio)
+            opt1.addWidget(opt1_radio)
+            # '' txt_i
+            self.opt1_txt_i = QLineEdit()
+            self.opt1_txt_i.setPlaceholderText("i")
+            opt1.addWidget(self.opt1_txt_i)
+            # '' ", " label
+            lbl = QLabel(", ")
+            opt1.addWidget(lbl)
+            # '' txt_n
+            self.opt1_txt_n = QLineEdit()
+            self.opt1_txt_n.setPlaceholderText("n")
+            opt1.addWidget(self.opt1_txt_n)
+            lbl = QLabel(" times per day.")
+            opt1.addWidget(lbl)
+
+            row_inline_dosage_container.addLayout(opt1)
+
+            opt_str = "Take [i] as needed, up to [n] times per day."
+            opt2 = QHBoxLayout()
+            opt2_radio = QRadioButton("Take")
+            opt2_radio.setStatusTip(opt_str)
+            self.dosage_options_grp.addButton(opt2_radio)
+            opt2.addWidget(opt2_radio)
+            # '' txt_i
+            self.opt2_txt_i = QLineEdit()
+            self.opt2_txt_i.setPlaceholderText("i")
+            opt2.addWidget(self.opt2_txt_i)
+            # '' ", " label
+            lbl = QLabel(" as needed up to ")
+            opt2.addWidget(lbl)
+            # '' txt_n
+            self.opt2_txt_n = QLineEdit()
+            self.opt2_txt_n.setPlaceholderText("n")
+            opt2.addWidget(self.opt2_txt_n)
+            lbl = QLabel(" times per day.")
+            opt2.addWidget(lbl)
+
+            row_inline_dosage_container.addLayout(opt2)
+
+            opt_str = "Take according to regime."
+            opt3 = QHBoxLayout()
+            opt3_radio = QRadioButton(opt_str)
+            opt3_radio.setStatusTip(opt_str)
+            self.dosage_options_grp.addButton(opt3_radio)
+            opt3.addWidget(opt3_radio)
+
+            row_inline_dosage_container.addLayout(opt3)
+
+            # option custom text row
+            opt4 = QHBoxLayout()
+            opt4_radio = QRadioButton("Custom")
+            opt4_radio.setStatusTip("Custom: ")
+            self.dosage_options_grp.addButton(opt4_radio)
+            opt4.addWidget(opt4_radio)
+            self.opt4_txt = QLineEdit()
+            self.opt4_txt.setPlaceholderText(
+                "Caution - use the preset options where possible.")
+            self.opt4_txt.setEnabled(False)
+            opt4.addWidget(self.opt4_txt)
+
+            row_inline_dosage_container.addLayout(opt4)
+
+            # connect controls to event handlers
+            for radio in self.dosage_options_grp.buttons():
+                radio.released.connect(lambda: self.option_dosage_clicked())
+
+            self.opt4_txt.textChanged.connect(
+                lambda: self.txt_custom_changed())
+            return row_inline_dosage_container
+
+        def row_statement():
+            row_statement = QHBoxLayout()
+            self.dosage_statement = QLabel("...")
+            self.dosage_statement.setMinimumWidth(300)
+            self.dosage_statement.setAlignment(Qt.AlignHCenter)
+            self.btn_validate = QPushButton("Check")
+            self.btn_validate.setMaximumWidth(150)
+            self.btn_validate.clicked.connect(self.btn_clicked_validate)
+            row_statement.addWidget(self.dosage_statement)
+            row_statement.addWidget(self.btn_validate)
+            return row_statement
+
+        def row_buttons():
+            row_buttons = QHBoxLayout()
+            self.btn_reset = QPushButton("Reset")
+            self.btn_submit = QPushButton("Submit")
+            self.btn_submit.setEnabled(False)  # disable until data validates
+            row_buttons.addWidget(self.btn_reset)
+            row_buttons.addWidget(self.btn_submit)
+            return row_buttons()
+
         # wrapper for entire form
         wrapper = QVBoxLayout()
         self.setLayout(wrapper)
 
-        # medication name
-        row_med_name = QFormLayout()
-        self.lbl_name = QLabel("Medication name")
-        self.txt_name = QLineEdit()
-        row_med_name.addRow(self.lbl_name, self.txt_name)
-        wrapper.addLayout(row_med_name)
-
-        # medication strength
-        # quantity in
-        row_strength = QHBoxLayout()
-        self.lbl_strength = QLabel("Strength")
-        self.txt_strength = IntInput()
-        self.txt_strength.setMinimumWidth(100)
-        self.cbo_strength_unit = QComboBox()
-        for unit in cfg.valid_strength_units:
-            self.cbo_strength_unit.addItem(unit)
-        self.cbo_strength_unit.setMaximumWidth(50)
-        self.lbl_qty = QLabel("Qty In")
-        self.txt_qty = QLineEdit()
-        row_strength.addWidget(self.lbl_strength)
-        row_strength.addWidget(self.txt_strength)
-        row_strength.addWidget(self.cbo_strength_unit)
-        row_strength.addWidget(self.lbl_qty)
-        row_strength.addWidget(self.txt_qty)
-        wrapper.addLayout(row_strength)
-
-        # in-line dosage
-        row_inline_dosage_container = QVBoxLayout()
-        lbl_dosage = QLabel("Dosage:")
-        row_inline_dosage_container.addWidget(lbl_dosage)
-        # TODO: procedural rows from cfg.lst_freqs. for now, hard-coded
-        # options
-        self.dosage_options_grp = QButtonGroup()
-
-        opt_str = "Take [i], [n] times per day."
-        # '' radio button
-        opt1 = QHBoxLayout()
-        opt1_radio = QRadioButton("Take")
-        opt1_radio.setStatusTip(opt_str)
-        # opt1_radio.toggled.connect(lambda: self.option_dosage_clicked())
-        self.dosage_options_grp.addButton(opt1_radio)
-        opt1.addWidget(opt1_radio)
-        # '' txt_i
-        self.opt1_txt_i = QLineEdit()
-        self.opt1_txt_i.setPlaceholderText("i")
-        opt1.addWidget(self.opt1_txt_i)
-        # '' ", " label
-        lbl = QLabel(", ")
-        opt1.addWidget(lbl)
-        # '' txt_n
-        self.opt1_txt_n = QLineEdit()
-        self.opt1_txt_n.setPlaceholderText("n")
-        opt1.addWidget(self.opt1_txt_n)
-        lbl = QLabel(" times per day.")
-        opt1.addWidget(lbl)
-
-        row_inline_dosage_container.addLayout(opt1)
-
-        opt_str = "Take [i] as needed, up to [n] times per day."
-        opt2 = QHBoxLayout()
-        opt2_radio = QRadioButton("Take")
-        opt2_radio.setStatusTip(opt_str)
-        self.dosage_options_grp.addButton(opt2_radio)
-        opt2.addWidget(opt2_radio)
-        # '' txt_i
-        self.opt2_txt_i = QLineEdit()
-        self.opt2_txt_i.setPlaceholderText("i")
-        opt2.addWidget(self.opt2_txt_i)
-        # '' ", " label
-        lbl = QLabel(" as needed up to ")
-        opt2.addWidget(lbl)
-        # '' txt_n
-        self.opt2_txt_n = QLineEdit()
-        self.opt2_txt_n.setPlaceholderText("n")
-        opt2.addWidget(self.opt2_txt_n)
-        lbl = QLabel(" times per day.")
-        opt2.addWidget(lbl)
-
-        row_inline_dosage_container.addLayout(opt2)
-
-        opt_str = "Take according to regime."
-        opt3 = QHBoxLayout()
-        opt3_radio = QRadioButton(opt_str)
-        opt3_radio.setStatusTip(opt_str)
-        self.dosage_options_grp.addButton(opt3_radio)
-        opt3.addWidget(opt3_radio)
-
-        row_inline_dosage_container.addLayout(opt3)
-
-        # option custom text row
-        opt4 = QHBoxLayout()
-        opt4_radio = QRadioButton("Custom")
-        opt4_radio.setStatusTip("Custom: ")
-        self.dosage_options_grp.addButton(opt4_radio)
-        opt4.addWidget(opt4_radio)
-        self.opt4_txt = QLineEdit()
-        self.opt4_txt.setPlaceholderText(
-            "Caution - use the preset options where possible.")
-        self.opt4_txt.setEnabled(False)
-        opt4.addWidget(self.opt4_txt)
-
-        row_inline_dosage_container.addLayout(opt4)
-
-        # connect controls to event handlers
-        for radio in self.dosage_options_grp.buttons():
-            radio.released.connect(lambda: self.option_dosage_clicked())
-        self.opt4_txt.textChanged.connect(lambda: self.txt_custom_changed())
-
-        # add dosage inline to page wrapper
-        wrapper.addLayout(row_inline_dosage_container)
-
-        # statement
-        row_statement = QHBoxLayout()
-        self.dosage_statement = QLabel("...")
-        self.dosage_statement.setMinimumWidth(300)
-        self.dosage_statement.setAlignment(Qt.AlignHCenter)
-        self.btn_validate = QPushButton("Check")
-        self.btn_validate.setMaximumWidth(150)
-        self.btn_validate.clicked.connect(self.btn_clicked_validate)
-        row_statement.addWidget(self.dosage_statement)
-        row_statement.addWidget(self.btn_validate)
-        wrapper.addLayout(row_statement)
-
-        # submit/reset
-        row_buttons = QHBoxLayout()
-        self.btn_reset = QPushButton("Reset")
-        self.btn_submit = QPushButton("Submit")
-        self.btn_submit.setEnabled(False)  # disable until data validates
-        row_buttons.addWidget(self.btn_reset)
-        row_buttons.addWidget(self.btn_submit)
-        wrapper.addLayout(row_buttons)
+        wrapper.addLayout(row_medication())
+        wrapper.addLayout(row_strength_qty())
+        wrapper.addLayout(row_dosage())
+        wrapper.addLayout(row_statement())
+        wrapper.addLayout(row_buttons())
 
     def option_dosage_clicked(self):
         for radio in self.dosage_options_grp.buttons():
