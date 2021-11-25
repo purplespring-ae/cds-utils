@@ -202,6 +202,8 @@ class NewMedWindow(QWidget):
 
     # EVENT HANDLERS
     def option_dosage_changed(self):
+        # disable submit button to force re-validation
+        self.btn_submit.setEnabled(False)
         for radio in self.dosage_options_grp.buttons():
             if radio.isChecked():
                 self.dosage_option = radio.statusTip()
@@ -274,50 +276,55 @@ class NewMedWindow(QWidget):
         self.dosage_statement.setText(self.dosage_option + statement_str)
 
     def btn_clicked_validate(self):
-        valid_data = {  # add fields which are always active
-            self.txt_name: False,
-            self.txt_strength: False,
-            self.txt_qty: False,
+        valid_data = {  # default to fail
+            "name": False,
+            "strength": False,
+            "qty": False,
+            "n": False,
+            "i": False
         }
-        # add to dict fields which may or may not be active
+        # validate medication name
+        if self.txt_name.text():
+            valid_data.update({"name": True})
+        # validate strength
+        if self.txt_strength.text():
+            valid_data.update({"strength": True})
+        # validate dosage
         opt_str = self.dosage_options_grp.checkedButton().statusTip(
         ) if self.dosage_options_grp.checkedButton() else ""
         if "[n]" in opt_str or "[i]" in opt_str:
             # active_n and active_i are set, get which ones
             for txt in self.list_exclusive_txtlines:
-                if txt.isEnabled() and txt.placeholderText == "n":
-                    self.active_n = txt
-                    valid_data.update({self.active_n: False})
-                elif txt.isEnabled() and txt.placeholderText == "i":
-                    self.active_i = txt
-                    valid_data.update({self.active_i: False})
+                if txt.isEnabled() and txt.text():
+                    valid_data.update({txt.objectName()[-1:]: True})
+                elif txt.isEnabled():
+                    valid_data.update({txt.objectName()[-1:]: False})
         elif self.dosage_options_grp.checkedButton():
             # option 3 or 4. n text fields to validate
-            print("No text fields active needing validation.")
+            valid_data.update({"n": True})
+            valid_data.update({"i": True})
         else:
-            # no dosage selected, skip validation
+            # no dosage selected, fail validation
             return False
 
-        # validate medication name
-        if self.txt_name.text():
-            valid_data.update({self.txt_name, True})
-            print("Validated data.")
-        # validate strength
-        # validate dosage
-            # validate i
-            # validate n
         # validate qty in
+        if self.txt_qty.text():
+            valid_data.update({"qty": True})
 
         # aggregate validation
-        count_invalid = 0
-        for field in valid_data:
-            if not valid_data[field]:
-                count_invalid += 1
-                # TODO: store field for notification of invalid input to user
-        if count_invalid != 0:
+        print(valid_data)
+        print(valid_data.values())
+        if False not in valid_data.values():
             self.btn_submit.setEnabled(True)
-        else:
-            pass  # TODO: indicate validation issues to user
+        # count_invalid = 0
+        # for val in valid_data.values():
+        #     if not val:
+        #         count_invalid += 1
+        #         # TODO: store field for notification of invalid input to user
+        # if count_invalid != 0:
+        #     self.btn_submit.setEnabled(True)
+        # else:
+        #     pass  # TODO: indicate validation issues to user
 
     def reset_clicked(self):
         pass
