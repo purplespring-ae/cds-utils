@@ -166,7 +166,6 @@ class NewMedWindow(QWidget):
         wrapper.addLayout(row_buttons)
 
     def option_dosage_clicked(self):
-        # TODO: disable other rows' txt_i, txt_n
         for radio in self.dosage_options_grp.buttons():
             if radio.isChecked():
                 self.dosage_option = radio.statusTip()
@@ -180,13 +179,34 @@ class NewMedWindow(QWidget):
                         "[n]", str_n)
                     statement_str = statement_str.replace(
                         "[i]", str_i)
+                    # display statement
                     self.dosage_statement.setText(statement_str)
+                    # clear & disable unselected txt input
+                    # TODO: create class & method for toggleable txt inputs to avoid replicating code between options
+                    self.opt1_txt_n.setEnabled(True)
+                    self.opt1_txt_i.setEnabled(True)
+                    self.opt2_txt_n.clear()
+                    self.opt2_txt_i.clear()
+                    self.opt2_txt_n.setEnabled(False)
+                    self.opt2_txt_i.setEnabled(False)
                 elif radio_i == 2:
                     str_n = self.opt2_txt_n.text() if len(
                         self.opt2_txt_n.text()) != 0 else "[BLANK: n]"
                     str_i = self.opt2_txt_i.text() if len(
                         self.opt2_txt_i.text()) != 0 else "[BLANK: i]"
+                    statement_str = self.dosage_option.replace(
+                        "[n]", str_n)
+                    statement_str = statement_str.replace(
+                        "[i]", str_i)
+                    # display statement
                     self.dosage_statement.setText(statement_str)
+                    # clear & disable unselected txt input
+                    self.opt2_txt_n.setEnabled(True)
+                    self.opt2_txt_i.setEnabled(True)
+                    self.opt1_txt_n.clear()
+                    self.opt1_txt_i.clear()
+                    self.opt1_txt_n.setEnabled(False)
+                    self.opt1_txt_i.setEnabled(False)
                 elif radio_i == 3:
                     self.dosage_statement.setText(self.dosage_option)
                 elif radio_i == 4:
