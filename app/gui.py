@@ -62,79 +62,98 @@ class NewMedWindow(QWidget):
             # TODO: procedural rows from cfg.lst_freqs. for now, hard-coded
             # options
             self.dosage_options_grp = QButtonGroup()
+            list_exclusive_txtlines = []
 
-            opt_str = "Take [i], [n] times per day."
-            # '' radio button
-            opt1 = QHBoxLayout()
-            opt1_radio = QRadioButton("Take")
-            opt1_radio.setStatusTip(opt_str)
-            # opt1_radio.toggled.connect(lambda: self.option_dosage_clicked())
-            self.dosage_options_grp.addButton(opt1_radio)
-            opt1.addWidget(opt1_radio)
-            # '' txt_i
-            self.opt1_txt_i = QLineEdit()
-            self.opt1_txt_i.setPlaceholderText("i")
-            opt1.addWidget(self.opt1_txt_i)
-            # '' ", " label
-            lbl = QLabel(", ")
-            opt1.addWidget(lbl)
-            # '' txt_n
-            self.opt1_txt_n = QLineEdit()
-            self.opt1_txt_n.setPlaceholderText("n")
-            opt1.addWidget(self.opt1_txt_n)
-            lbl = QLabel(" times per day.")
-            opt1.addWidget(lbl)
+            def opt1():
+                opt_str = "Take [i], [n] times per day."
+                # '' radio button
+                opt1 = QHBoxLayout()
+                opt1_radio = QRadioButton("Take")
+                opt1_radio.setStatusTip(opt_str)
+                self.dosage_options_grp.addButton(opt1_radio)
+                opt1.addWidget(opt1_radio)
+                # '' txt_i
+                self.opt1_txt_i = QLineEdit()
+                self.opt1_txt_i.setPlaceholderText("i")
+                opt1.addWidget(self.opt1_txt_i)
+                # '' ", " label
+                lbl = QLabel(", ")
+                opt1.addWidget(lbl)
+                # '' txt_n
+                self.opt1_txt_n = QLineEdit()
+                self.opt1_txt_n.setPlaceholderText("n")
+                self.opt1_txt_n.setEnabled(False)
+                opt1.addWidget(self.opt1_txt_n)
+                lbl = QLabel(" times per day.")
+                opt1.addWidget(lbl)
+                # add textlines to list for easy mass disable/enable
+                list_exclusive_txtlines.append(self.opt1_txt_n)
+                list_exclusive_txtlines.append(self.opt1_txt_i)
+                return opt1
 
-            row_inline_dosage_container.addLayout(opt1)
+            def opt2():
+                opt_str = "Take [i] as needed, up to [n] times per day."
+                opt2 = QHBoxLayout()
+                opt2_radio = QRadioButton("Take")
+                opt2_radio.setStatusTip(opt_str)
+                self.dosage_options_grp.addButton(opt2_radio)
+                opt2.addWidget(opt2_radio)
+                # '' txt_i
+                self.opt2_txt_i = QLineEdit()
+                self.opt2_txt_i.setPlaceholderText("i")
+                opt2.addWidget(self.opt2_txt_i)
+                # '' ", " label
+                lbl = QLabel(" as needed up to ")
+                opt2.addWidget(lbl)
+                # '' txt_n
+                self.opt2_txt_n = QLineEdit()
+                self.opt2_txt_n.setPlaceholderText("n")
+                self.opt2_txt_n.setEnabled(False)
+                opt2.addWidget(self.opt2_txt_n)
+                lbl = QLabel(" times per day.")
+                opt2.addWidget(lbl)
+                # add textlines to list for easy mass disable/enable
+                list_exclusive_txtlines.append(self.opt2_txt_n)
+                list_exclusive_txtlines.append(self.opt2_txt_i)
+                return opt2
 
-            opt_str = "Take [i] as needed, up to [n] times per day."
-            opt2 = QHBoxLayout()
-            opt2_radio = QRadioButton("Take")
-            opt2_radio.setStatusTip(opt_str)
-            self.dosage_options_grp.addButton(opt2_radio)
-            opt2.addWidget(opt2_radio)
-            # '' txt_i
-            self.opt2_txt_i = QLineEdit()
-            self.opt2_txt_i.setPlaceholderText("i")
-            opt2.addWidget(self.opt2_txt_i)
-            # '' ", " label
-            lbl = QLabel(" as needed up to ")
-            opt2.addWidget(lbl)
-            # '' txt_n
-            self.opt2_txt_n = QLineEdit()
-            self.opt2_txt_n.setPlaceholderText("n")
-            opt2.addWidget(self.opt2_txt_n)
-            lbl = QLabel(" times per day.")
-            opt2.addWidget(lbl)
+            def opt3():
+                opt_str = "Take according to regime."
+                opt3 = QHBoxLayout()
+                opt3_radio = QRadioButton(opt_str)
+                opt3_radio.setStatusTip(opt_str)
+                self.dosage_options_grp.addButton(opt3_radio)
+                opt3.addWidget(opt3_radio)
+                return opt3
 
-            row_inline_dosage_container.addLayout(opt2)
+            def opt4():
+                # option custom text row
+                opt4 = QHBoxLayout()
+                opt4_radio = QRadioButton("Custom")
+                opt4_radio.setStatusTip("Custom: ")
+                self.dosage_options_grp.addButton(opt4_radio)
+                opt4.addWidget(opt4_radio)
+                self.opt4_txt = QLineEdit()
+                self.opt4_txt.setPlaceholderText(
+                    "Caution - use the preset options where possible.")
+                self.opt4_txt.setEnabled(False)
+                opt4.addWidget(self.opt4_txt)
+                list_exclusive_txtlines.append(self.opt4_txt)
+                return opt4
 
-            opt_str = "Take according to regime."
-            opt3 = QHBoxLayout()
-            opt3_radio = QRadioButton(opt_str)
-            opt3_radio.setStatusTip(opt_str)
-            self.dosage_options_grp.addButton(opt3_radio)
-            opt3.addWidget(opt3_radio)
+            # BUILD AND ADD ROWS
+            row_inline_dosage_container.addLayout(opt1())
+            row_inline_dosage_container.addLayout(opt2())
+            row_inline_dosage_container.addLayout(opt3())
+            row_inline_dosage_container.addLayout(opt4())
 
-            row_inline_dosage_container.addLayout(opt3)
+            # connect to handlers and prepare controls
+            for txt in list_exclusive_txtlines:
+                txt.setEnabled(False)
+                txt.textChanged.connect(lambda: self.option_dosage_changed())
 
-            # option custom text row
-            opt4 = QHBoxLayout()
-            opt4_radio = QRadioButton("Custom")
-            opt4_radio.setStatusTip("Custom: ")
-            self.dosage_options_grp.addButton(opt4_radio)
-            opt4.addWidget(opt4_radio)
-            self.opt4_txt = QLineEdit()
-            self.opt4_txt.setPlaceholderText(
-                "Caution - use the preset options where possible.")
-            self.opt4_txt.setEnabled(False)
-            opt4.addWidget(self.opt4_txt)
-
-            row_inline_dosage_container.addLayout(opt4)
-
-            # connect controls to event handlers
             for radio in self.dosage_options_grp.buttons():
-                radio.released.connect(lambda: self.option_dosage_clicked())
+                radio.released.connect(lambda: self.option_dosage_changed())
 
             self.opt4_txt.textChanged.connect(
                 lambda: self.txt_custom_changed())
@@ -171,7 +190,8 @@ class NewMedWindow(QWidget):
         wrapper.addLayout(row_statement())
         wrapper.addLayout(row_buttons())
 
-    def option_dosage_clicked(self):
+    # EVENT HANDLERS
+    def option_dosage_changed(self):
         for radio in self.dosage_options_grp.buttons():
             if radio.isChecked():
                 self.dosage_option = radio.statusTip()
@@ -233,6 +253,9 @@ class NewMedWindow(QWidget):
         statement_str = self.opt4_txt.text() if len(
             self.opt4_txt.text()) != 0 else "[BLANK: custom dosage/frequency]"
         self.dosage_statement.setText(self.dosage_option + statement_str)
+
+    def refresh_statement(self):
+        self.option_dosage_changed()
 
     def btn_clicked_validate(self):
         valid_data = {  # no need to validate fields derived from config.py
