@@ -68,11 +68,13 @@ class NewMedWindow(QWidget):
         # TODO: procedural rows from cfg.lst_freqs. for now, hard-coded
         # options
         self.dosage_options_grp = QButtonGroup()
-        # ' option "Take [i], [n] times per day."
+
+        opt_str = "Take [i], [n] times per day."
         # '' radio button
         opt1 = QHBoxLayout()
         opt1_radio = QRadioButton("Take")
-        opt1_radio.setStatusTip("Take [i], [n] times per day.")
+        opt1_radio.setStatusTip(opt_str)
+        # opt1_radio.toggled.connect(lambda: self.option_dosage_clicked())
         self.dosage_options_grp.addButton(opt1_radio)
         opt1.addWidget(opt1_radio)
         # '' txt_i
@@ -88,13 +90,13 @@ class NewMedWindow(QWidget):
         opt1.addWidget(self.opt1_txt_n)
         lbl = QLabel(" times per day.")
         opt1.addWidget(lbl)
-        # add to row
+
         row_inline_dosage_container.addLayout(opt1)
 
-        # option "Take [i] as needed up to [n] times per day."
+        opt_str = "Take [i] as needed, up to [n] times per day."
         opt2 = QHBoxLayout()
         opt2_radio = QRadioButton("Take")
-        opt2_radio.setStatusTip("Take [i], [n] times per day.")
+        opt2_radio.setStatusTip(opt_str)
         self.dosage_options_grp.addButton(opt2_radio)
         opt2.addWidget(opt2_radio)
         # '' txt_i
@@ -110,15 +112,34 @@ class NewMedWindow(QWidget):
         opt2.addWidget(self.opt2_txt_n)
         lbl = QLabel(" times per day.")
         opt2.addWidget(lbl)
-        # add to row
+
         row_inline_dosage_container.addLayout(opt2)
-        # option "Take according to regime."
+
+        opt_str = "Take according to regime."
         opt3 = QHBoxLayout()
-        opt3_radio = QRadioButton("Take according to regime.")
+        opt3_radio = QRadioButton(opt_str)
+        opt3_radio.setStatusTip(opt_str)
         self.dosage_options_grp.addButton(opt3_radio)
         opt3.addWidget(opt3_radio)
+
         row_inline_dosage_container.addLayout(opt3)
+
         # option custom text row
+        opt4 = QHBoxLayout()
+        opt4_radio = QRadioButton("Custom")
+        opt4_radio.setStatusTip("Custom: ")
+        self.dosage_options_grp.addButton(opt4_radio)
+        opt4.addWidget(opt4_radio)
+        self.opt4_txt = QLineEdit()
+        self.opt4_txt.setPlaceholderText(
+            "Caution - use the preset options where possible.")
+        opt4.addWidget(self.opt4_txt)
+
+        row_inline_dosage_container.addLayout(opt4)
+
+        # connect buttons to event handler
+        for radio in self.dosage_options_grp.buttons():
+            radio.released.connect(lambda: self.option_dosage_clicked())
 
         # add dosage inline to page wrapper
         wrapper.addLayout(row_inline_dosage_container)
@@ -130,7 +151,7 @@ class NewMedWindow(QWidget):
         self.dosage_statement.setAlignment(Qt.AlignHCenter)
         self.btn_validate = QPushButton("Check")
         self.btn_validate.setMaximumWidth(150)
-        self.btn_validate.clicked.connect(self.validate_clicked)
+        self.btn_validate.clicked.connect(self.btn_clicked_validate)
         row_statement.addWidget(self.dosage_statement)
         row_statement.addWidget(self.btn_validate)
         wrapper.addLayout(row_statement)
@@ -144,12 +165,41 @@ class NewMedWindow(QWidget):
         row_buttons.addWidget(self.btn_submit)
         wrapper.addLayout(row_buttons)
 
-    def switch_dosage(self):
-        # store value as object var
-        self.dosage_selected = self.dosage_radio_grp.checkedButton().text()
-        # enable/disable i, n txtinput
+    def option_dosage_clicked(self):
+        # TODO: disable other rows' txt_i, txt_n
+        for radio in self.dosage_options_grp.buttons():
+            if radio.isChecked():
+                self.dosage_option = radio.statusTip()
+                radio_i = self.dosage_options_grp.buttons().index(radio) + 1
+                if radio_i == 1:
+                    str_n = self.opt1_txt_n.text() if len(
+                        self.opt1_txt_n.text()) != 0 else "[BLANK: n]"
+                    str_i = self.opt1_txt_i.text() if len(
+                        self.opt1_txt_i.text()) != 0 else "[BLANK: i]"
+                    statement_str = self.dosage_option.replace(
+                        "[n]", str_n)
+                    statement_str = statement_str.replace(
+                        "[i]", str_i)
+                    self.dosage_statement.setText(statement_str)
+                elif radio_i == 2:
+                    str_n = self.opt2_txt_n.text() if len(
+                        self.opt2_txt_n.text()) != 0 else "[BLANK: n]"
+                    str_i = self.opt2_txt_i.text() if len(
+                        self.opt2_txt_i.text()) != 0 else "[BLANK: i]"
+                    self.dosage_statement.setText(statement_str)
+                elif radio_i == 3:
+                    self.dosage_statement.setText(self.dosage_option)
+                elif radio_i == 4:
+                    self.dosage_statement.setText(
+                        self.dosage_option + self.opt4_txt.text())
+                else:
+                    raise ValueError()
 
-    def validate_clicked(self):
+    def txt_custom_changed(self):
+        # TODO: update self.dosage_statement.text() when custom dosage is changed
+        pass
+
+    def btn_clicked_validate(self):
         valid_data = {  # no need to validate fields derived from config.py
             self.txt_name: False,
             self.txt_strength: False,
