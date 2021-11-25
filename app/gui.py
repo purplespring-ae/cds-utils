@@ -159,7 +159,7 @@ class NewMedWindow(QWidget):
             self.btn_submit.setEnabled(False)  # disable until data validates
             row_buttons.addWidget(self.btn_reset)
             row_buttons.addWidget(self.btn_submit)
-            return row_buttons()
+            return row_buttons
 
         # wrapper for entire form
         wrapper = QVBoxLayout()
