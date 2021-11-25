@@ -133,13 +133,15 @@ class NewMedWindow(QWidget):
         self.opt4_txt = QLineEdit()
         self.opt4_txt.setPlaceholderText(
             "Caution - use the preset options where possible.")
+        self.opt4_txt.setEnabled(False)
         opt4.addWidget(self.opt4_txt)
 
         row_inline_dosage_container.addLayout(opt4)
 
-        # connect buttons to event handler
+        # connect controls to event handlers
         for radio in self.dosage_options_grp.buttons():
             radio.released.connect(lambda: self.option_dosage_clicked())
+        self.opt4_txt.textChanged.connect(lambda: self.txt_custom_changed())
 
         # add dosage inline to page wrapper
         wrapper.addLayout(row_inline_dosage_container)
@@ -187,8 +189,10 @@ class NewMedWindow(QWidget):
                     self.opt1_txt_i.setEnabled(True)
                     self.opt2_txt_n.clear()
                     self.opt2_txt_i.clear()
+                    self.opt4_txt.clear()
                     self.opt2_txt_n.setEnabled(False)
                     self.opt2_txt_i.setEnabled(False)
+                    self.opt4_txt.setEnabled(False)
                 elif radio_i == 2:
                     str_n = self.opt2_txt_n.text() if len(
                         self.opt2_txt_n.text()) != 0 else "[BLANK: n]"
@@ -205,19 +209,26 @@ class NewMedWindow(QWidget):
                     self.opt2_txt_i.setEnabled(True)
                     self.opt1_txt_n.clear()
                     self.opt1_txt_i.clear()
+                    self.opt4_txt.clear()
                     self.opt1_txt_n.setEnabled(False)
                     self.opt1_txt_i.setEnabled(False)
+                    self.opt4_txt.setEnabled(False)
                 elif radio_i == 3:
                     self.dosage_statement.setText(self.dosage_option)
                 elif radio_i == 4:
+                    self.opt4_txt.setEnabled(True)
+                    statement_str = self.opt4_txt.text() if len(
+                        self.opt4_txt.text()) != 0 else "[BLANK: custom dosage/frequency]"
                     self.dosage_statement.setText(
-                        self.dosage_option + self.opt4_txt.text())
+                        self.dosage_option + statement_str)
+                    self.txt_custom_changed()
                 else:
                     raise ValueError()
 
     def txt_custom_changed(self):
-        # TODO: update self.dosage_statement.text() when custom dosage is changed
-        pass
+        statement_str = self.opt4_txt.text() if len(
+            self.opt4_txt.text()) != 0 else "[BLANK: custom dosage/frequency]"
+        self.dosage_statement.setText(self.dosage_option + statement_str)
 
     def btn_clicked_validate(self):
         valid_data = {  # no need to validate fields derived from config.py
