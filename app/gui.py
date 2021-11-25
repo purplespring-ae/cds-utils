@@ -58,19 +58,30 @@ class NewMedWindow(QWidget):
         row_strength.addWidget(self.txt_qty)
         wrapper.addLayout(row_strength)
 
-        # dosage
-        row_dosage = QHBoxLayout()
-        self.lbl_dosage = QLabel("Dosage")
-        self.cbo_dosage_type = QComboBox()
-        for type in cfg.freqs:
-            self.cbo_dosage_type.addItem(cfg.freqs[type])
-        self.txt_i = IntInput("i")
-        self.txt_n = IntInput("n")
-        row_dosage.addWidget(self.lbl_dosage)
-        row_dosage.addWidget(self.cbo_dosage_type)
-        row_dosage.addWidget(self.txt_i)
-        row_dosage.addWidget(self.txt_n)
-        wrapper.addLayout(row_dosage)
+        # alternative dosage - radio boxes
+        row_dosage_options = QVBoxLayout()
+        self.lbl_dosage2 = QLabel("Dosage")
+        row_dosage_options.addWidget(self.lbl_dosage2)
+        for type in cfg.list_freqs:
+            this_type_row = QHBoxLayout()
+            radio = QRadioButton(type)
+            this_type_row.addWidget(radio)
+            # add needed LineEdit widgets for i, n
+            if "[i]" in type:
+                # needs_i = True
+                txt_i = IntInput("i")
+                txt_i.setEnabled(False)
+                this_type_row.addWidget(txt_i)
+            if "[n]" in type:
+                # needs_n = True
+                txt_n = IntInput("n")
+                txt_n.setEnabled(False)
+                this_type_row.addWidget(txt_n)
+            row_dosage_options.addLayout(this_type_row)
+        custom_dosage = QLineEdit()
+        custom_dosage.setPlaceholderText("Custom dosage (Caution!)")
+        row_dosage_options.addWidget(custom_dosage)
+        wrapper.addLayout(row_dosage_options)
 
         # statement
         row_statement = QHBoxLayout()
@@ -95,6 +106,12 @@ class NewMedWindow(QWidget):
 
     def validate_clicked(self):
         is_input_valid = False
+        valid_data = {  # no need to validate fields derived from config.py
+            self.txt_name: False,
+            self.txt_strength: False,
+            self.txt_qty: False
+
+        }
         # validate medication name
         # validate strength
         # validate dosage
@@ -102,6 +119,8 @@ class NewMedWindow(QWidget):
 
         if is_input_valid:
             self.btn_submit.setEnabled(True)
+        else:
+            pass  # indicate issues to user
 
     def reset_clicked(self):
         pass
