@@ -16,12 +16,6 @@ class IntInput(QLineEdit):
         self.setAlignment(Qt.AlignHCenter)
 
 
-# class RadioExclusiveLineEdit(QLineEdit):
-#     def __init__(self, *args, **kwargs):
-#         super(QLineEdit, self).__init__(*args, **kwargs)
-#         self.setEnabled = False
-
-
 class NewMedWindow(QWidget):
     def __init__(self, *args, **kwargs):
         super(QWidget, self).__init__(*args, **kwargs)
@@ -175,7 +169,7 @@ class NewMedWindow(QWidget):
             self.dosage_statement.setAlignment(Qt.AlignHCenter)
             self.btn_validate = QPushButton("Check")
             self.btn_validate.setMaximumWidth(150)
-            self.btn_validate.clicked.connect(self.btn_clicked_validate)
+            self.btn_validate.clicked.connect(self.btn_validate_clicked)
             row_statement.addWidget(self.dosage_statement)
             row_statement.addWidget(self.btn_validate)
             return row_statement
@@ -183,8 +177,10 @@ class NewMedWindow(QWidget):
         def row_buttons():
             row_buttons = QHBoxLayout()
             self.btn_reset = QPushButton("Reset")
+            self.btn_reset.clicked.connect(lambda: self.reset_clicked())
             self.btn_submit = QPushButton("Submit")
             self.btn_submit.setEnabled(False)  # disable until data validates
+            self.btn_submit.clicked.connect(lambda: self.submit_clicked())
             row_buttons.addWidget(self.btn_reset)
             row_buttons.addWidget(self.btn_submit)
             return row_buttons
@@ -275,7 +271,7 @@ class NewMedWindow(QWidget):
             self.opt4_txt.text()) != 0 else "[BLANK: custom dosage/frequency]"
         self.dosage_statement.setText(self.dosage_option + statement_str)
 
-    def btn_clicked_validate(self):
+    def btn_validate_clicked(self):
         valid_data = {  # default to fail
             "name": False,
             "strength": False,
@@ -313,24 +309,34 @@ class NewMedWindow(QWidget):
 
         # aggregate validation
         print(valid_data)
-        print(valid_data.values())
         if False not in valid_data.values():
             self.btn_submit.setEnabled(True)
-        # count_invalid = 0
-        # for val in valid_data.values():
-        #     if not val:
-        #         count_invalid += 1
-        #         # TODO: store field for notification of invalid input to user
-        # if count_invalid != 0:
-        #     self.btn_submit.setEnabled(True)
-        # else:
-        #     pass  # TODO: indicate validation issues to user
+        else:
+            pass
+            # TODO: indicate validation issues to user
 
     def reset_clicked(self):
-        pass
+        self.txt_name.clear()
+        self.txt_strength.clear()
+        self.txt_qty.clear()
+        self.opt1_txt_i.clear()
+        self.opt1_txt_n.clear()
+        self.opt2_txt_i.clear()
+        self.opt2_txt_n.clear()
+        self.opt4_txt.clear()
+        # TODO: Why does this not uncheck dosage radio button?
+        dosage_checked = self.dosage_options_grp.checkedButton()
+        dosage_checked.setChecked(False)
 
     def submit_clicked(self):
-        pass
+        self.btn_validate_clicked()  # force re-validation
+        export_values = {
+            "name": self.txt_name.text(),
+            "strength": self.txt_strength.text() + self.cbo_strength_unit.currentText(),
+            "qty_in": self.txt_qty.text(),
+            "dosage": self.dosage_statement.text()
+        }
+        print(export_values)
 
 
 def main():
