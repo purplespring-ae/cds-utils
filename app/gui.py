@@ -7,6 +7,8 @@ import sys
 
 import config as cfg
 
+# WIDGET OVERRIDES
+
 
 class IntInput(QLineEdit):
     def __init__(self, default_text=None, *args, **kwargs):
@@ -15,10 +17,13 @@ class IntInput(QLineEdit):
         self.setPlaceholderText(default_text)
         self.setAlignment(Qt.AlignHCenter)
 
+# WINDOWS
 
-class NewMedWindow(QWidget):
+
+class NewMedWidget(QWidget):
     def __init__(self, *args, **kwargs):
         super(QWidget, self).__init__(*args, **kwargs)
+        # TODO: deprecate this in favour of one window for add, edit & export meds in
         self.setWindowTitle("Add medication")
         self.initUI()
 
@@ -296,7 +301,7 @@ class NewMedWindow(QWidget):
                 elif txt.isEnabled():
                     valid_data.update({txt.objectName()[-1:]: False})
         elif self.dosage_options_grp.checkedButton():
-            # option 3 or 4. n text fields to validate
+            # option 3 or 4. no text fields to validate so pass automatically
             valid_data.update({"n": True})
             valid_data.update({"i": True})
         else:
@@ -337,11 +342,30 @@ class NewMedWindow(QWidget):
             "dosage": self.dosage_statement.text()
         }
         print(export_values)
+        # TODO: Send these values to a table on main meds menu to allow user to build the full Meds In doc
+
+
+class MedListWidget(QWidget):
+    def __init__(self, *args, **kwargs):
+        super(QWidget, self).__init__(*args, **kwargs)
+        self.initUI()
+
+    def initUI(self):
+        def row_table_view(self):
+            row_table_view = QVBoxLayout()
+            lbl_table_view = QLabel("Medication In")
+            row_table_view.addWidget(lbl_table_view)
+            return row_table_view
+
+        wrapper = QVBoxLayout()
+        self.setLayout(wrapper)
+
+        wrapper.addLayout(row_table_view)
 
 
 def main():
     app = QApplication(sys.argv)
-    window = NewMedWindow()
+    window = NewMedWidget()
     window.show()
     app.exec_()
 
