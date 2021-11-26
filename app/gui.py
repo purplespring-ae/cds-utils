@@ -351,11 +351,11 @@ class MedListWidget(QWidget):
         self.initUI()
 
     def initUI(self):
-        def row_table_view():
-            row_table_view = QVBoxLayout()
+        def table_group():
+            # TODO: set sizing of window, table and buttons to allow all to fit on screen
+            table_group = QHBoxLayout()
+            col_table_view = QVBoxLayout()
             lbl_table_view = QLabel("Medication In")
-            row_table_view.addWidget(lbl_table_view)
-            # TODO: go_learn("how do table?")
             # store as class attr and pass self as parent
             self.table_meds = QTableWidget(self)
             self.table_columns = []
@@ -375,16 +375,26 @@ class MedListWidget(QWidget):
             self.col1.setText("Strength")
             self.col2.setText("Dosage")
             self.col3.setText("Qty In")
+            # add table to col
+            col_table_view.addWidget(lbl_table_view)
+            col_table_view.addWidget(self.table_meds)
 
-            # add to layout
-            row_table_view.addWidget(self.table_meds)
+            col_table_buttons = QVBoxLayout()
+            btn_plus = QPushButton("+")
+            btn_minus = QPushButton("-")
+            col_table_buttons.addWidget(btn_plus)
+            col_table_buttons.addWidget(btn_minus)
 
-            return row_table_view
+            # add cols to group
+            table_group.addLayout(col_table_view)
+            table_group.addLayout(col_table_buttons)
+
+            return table_group
 
         wrapper = QVBoxLayout()
         self.setLayout(wrapper)
 
-        wrapper.addLayout(row_table_view())
+        wrapper.addLayout(table_group())
 
 
 def main():
