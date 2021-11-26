@@ -351,21 +351,46 @@ class MedListWidget(QWidget):
         self.initUI()
 
     def initUI(self):
-        def row_table_view(self):
+        def row_table_view():
             row_table_view = QVBoxLayout()
             lbl_table_view = QLabel("Medication In")
             row_table_view.addWidget(lbl_table_view)
+            # TODO: go_learn("how do table?")
+            # store as class attr and pass self as parent
+            self.table_meds = QTableWidget(self)
+            self.table_columns = []
+            # create columns, add to list for reference by group
+            self.table_meds.setColumnCount(4)
+            self.col0 = QTableWidgetItem()
+            self.col1 = QTableWidgetItem()
+            self.col2 = QTableWidgetItem()
+            self.col3 = QTableWidgetItem()
+            self.table_columns.extend(
+                [self.col0, self.col1, self.col2, self.col3])
+            for col in self.table_columns:
+                self.table_meds.setHorizontalHeaderItem(
+                    self.table_columns.index(col), col)
+            # name columns
+            self.col0.setText("Medication")
+            self.col1.setText("Strength")
+            self.col2.setText("Dosage")
+            self.col3.setText("Qty In")
+
+            # add to layout
+            row_table_view.addWidget(self.table_meds)
+
             return row_table_view
 
         wrapper = QVBoxLayout()
         self.setLayout(wrapper)
 
-        wrapper.addLayout(row_table_view)
+        wrapper.addLayout(row_table_view())
 
 
 def main():
     app = QApplication(sys.argv)
-    window = NewMedWidget()
+    # window = NewMedWidget()
+    window = MedListWidget()
     window.show()
     app.exec_()
 
