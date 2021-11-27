@@ -24,34 +24,30 @@ class MedsInTool(QWidget):
     def __init__(self, *args, **kwargs):
         super(QWidget, self).__init__(*args, **kwargs)
         self.initUI()
-
-    def initUI(self):
-        # Set window dimensions
         self.setFixedWidth(1024)
         self.setFixedHeight(768)
-        # Create layout
-        wrapper = QVBoxLayout()
-        row = QHBoxLayout()
-        # Add child widgets
-        new_med_widget = NewMedWidget()
-        med_list_widget = MedListWidget()
-        row.addWidget(new_med_widget)
-        row.addWidget(med_list_widget)
-        # TODO: work out how to make these show as sub-widgets on MedsInTool
-        new_med_widget.show()
-        med_list_widget.show()
-        wrapper.addLayout(row)
+        self.setWindowTitle("Medication In")
+
+    def initUI(self):
+        meds_in_container_widget = QWidget(self)
+        wrapper = QHBoxLayout(self)
+        self.new_med_widget = NewMedWidget()
+        self.med_list_widget = MedListWidget()
+        wrapper.addWidget(self.new_med_widget)
+        wrapper.addWidget(self.med_list_widget)
+        meds_in_container_widget.setLayout(wrapper)
+        self.setLayout(wrapper)
 
 
 class NewMedWidget(QWidget):
     def __init__(self, *args, **kwargs):
         super(QWidget, self).__init__(*args, **kwargs)
-        # TODO: deprecate this in favour of one window for add, edit & export meds in
-        # self.setWindowTitle("Add medication")
         self.initUI()
+        # TODO: set geometry
+        self.setMaximumHeight(280)
+        self.setMaximumWidth(360)
 
     def initUI(self):
-        # TODO: Split off elements that will be used for other windows
         def row_medication():
             row_med_name = QFormLayout()
             self.lbl_name = QLabel("Medication name")
@@ -61,6 +57,7 @@ class NewMedWidget(QWidget):
 
         def row_strength_qty():
             row_strength = QHBoxLayout()
+            # strength
             self.lbl_strength = QLabel("Strength")
             self.lbl_strength.setAlignment(Qt.AlignRight)
             self.txt_strength = IntInput()
@@ -69,12 +66,18 @@ class NewMedWidget(QWidget):
             for unit in cfg.valid_strength_units:
                 self.cbo_strength_unit.addItem(unit)
             self.cbo_strength_unit.setMaximumWidth(50)
+            # spacer # TODO: Make this responsive as using absolute sizes limits the benefit of using QVBox and QHBox instead of absolute positions
+            # spacer = QSpacerItem(65, 1)
+            # qty
             self.lbl_qty = QLabel("Qty In")
             self.lbl_qty.setAlignment(Qt.AlignRight)
             self.txt_qty = IntInput()
+            self.txt_qty.setMaximumWidth(40)
+            # add elements to layout
             row_strength.addWidget(self.lbl_strength)
             row_strength.addWidget(self.txt_strength)
             row_strength.addWidget(self.cbo_strength_unit)
+            # row_strength.addSpacerItem(spacer)
             row_strength.addWidget(self.lbl_qty)
             row_strength.addWidget(self.txt_qty)
             return row_strength
@@ -213,8 +216,9 @@ class NewMedWidget(QWidget):
             row_buttons.addWidget(self.btn_submit)
             return row_buttons
 
-        # wrapper for entire form
+        # wrapper for medication editor
         wrapper = QVBoxLayout()
+        wrapper.setAlignment(Qt.AlignTop)
         self.setLayout(wrapper)
         self.list_exclusive_txtlines = []
 
@@ -223,6 +227,7 @@ class NewMedWidget(QWidget):
         wrapper.addLayout(row_dosage())
         wrapper.addLayout(row_statement())
         wrapper.addLayout(row_buttons())
+        wrapper.addStretch()
 
     # EVENT HANDLERS
     def option_dosage_changed(self):
@@ -372,6 +377,7 @@ class MedListWidget(QWidget):
     def __init__(self, *args, **kwargs):
         super(QWidget, self).__init__(*args, **kwargs)
         self.initUI()
+        # TODO: Set geometry
 
     def initUI(self):
         def table_group():
@@ -382,7 +388,7 @@ class MedListWidget(QWidget):
             # store as class attr and pass self as parent
             self.table_meds = QTableWidget(self)
             self.table_columns = []
-            # create columns, add to list for reference by group
+            # create columns, set geometry & add to list for reference by group
             self.table_meds.setColumnCount(4)
             self.col0 = QTableWidgetItem()
             self.col1 = QTableWidgetItem()
