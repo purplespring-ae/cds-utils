@@ -20,11 +20,34 @@ class IntInput(QLineEdit):
 # WINDOWS
 
 
+class MedsInTool(QWidget):
+    def __init__(self, *args, **kwargs):
+        super(QWidget, self).__init__(*args, **kwargs)
+        self.initUI()
+
+    def initUI(self):
+        # Set window dimensions
+        self.setFixedWidth(1024)
+        self.setFixedHeight(768)
+        # Create layout
+        wrapper = QVBoxLayout()
+        row = QHBoxLayout()
+        # Add child widgets
+        new_med_widget = NewMedWidget()
+        med_list_widget = MedListWidget()
+        row.addWidget(new_med_widget)
+        row.addWidget(med_list_widget)
+        # TODO: work out how to make these show as sub-widgets on MedsInTool
+        new_med_widget.show()
+        med_list_widget.show()
+        wrapper.addLayout(row)
+
+
 class NewMedWidget(QWidget):
     def __init__(self, *args, **kwargs):
         super(QWidget, self).__init__(*args, **kwargs)
         # TODO: deprecate this in favour of one window for add, edit & export meds in
-        self.setWindowTitle("Add medication")
+        # self.setWindowTitle("Add medication")
         self.initUI()
 
     def initUI(self):
@@ -400,7 +423,7 @@ class MedListWidget(QWidget):
 def main():
     app = QApplication(sys.argv)
     # window = NewMedWidget()
-    window = MedListWidget()
+    window = MedsInTool()
     window.show()
     app.exec_()
 
