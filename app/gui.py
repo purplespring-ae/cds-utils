@@ -1,62 +1,102 @@
 # EXTERNAL MODULES
+from typing import Text
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import sys
 # INTERNAL MODULES
 import config as cfg
+from custom_widgets import *
 
 # ---------------------------------------------------------
 
-# WIDGET OVERRIDES
+# MAIN WIDGETS
 
 
-class TextInput(QLineEdit):
-    def __init__(self, min_width=None, max_width=None, default_text=None, *args, **kwargs):
-        super(QLineEdit, self).__init__(*args, **kwargs)
-        if min_width:
-            self.setMinimumWidth(min_width)
-        if max_width:
-            self.setMaximumWidth(max_width)
-        self.setPlaceholderText(default_text)
+class MainMenu(QWidget):
+    def __init__(self, *args, **kwargs):
+        super(QWidget, self).__init__(*args, **kwargs)
+        self.build_UI()
+        self.init_connects()
 
+    def build_UI(self):
+        # TODO: build out MainMenu GUI
+        # TODO: Main screen input for client details (Name, DOB, DOA, Room)
+        def build_r_client():
+            elem = QVBoxLayout()
+            # - name
+            row = QHBoxLayout()
+            lbl = QLabel("Name")
+            self.txt_client_fname = TextInput(100, 200, "First name")
+            self.txt_client_sname = TextInput(100, 200, "Surname")
+            row.addWidget(lbl)
+            row.addWidget(self.txt_client_fname)
+            row.addWidget(self.txt_client_sname)
+            elem.addLayout(row)
+            # - DOB
+            row = QHBoxLayout()
+            lbl = QLabel("Date of Birth")
+            self.txt_dob_d = TextInput(50, 100, "DD")
+            self.txt_dob_m = TextInput(50, 100, "MM")
+            self.txt_dob_y = TextInput(50, 100, "YY")
+            row.addWidget(lbl)
+            row.addWidget(self.txt_dob_d)
+            row.addWidget(self.txt_dob_m)
+            row.addWidget(self.txt_dob_y)
+            elem.addLayout(row)
+            # - DOA
+            row = QHBoxLayout()
+            lbl = QLabel("Date of Admission")
+            self.txt_doa_d = TextInput(50, 100, "DD")
+            self.txt_doa_m = TextInput(50, 100, "MM")
+            self.txt_doa_y = TextInput(50, 100, "YY")
+            row.addWidget(lbl)
+            row.addWidget(self.txt_doa_d)
+            row.addWidget(self.txt_doa_m)
+            row.addWidget(self.txt_doa_y)
+            elem.addLayout(row)
 
-class DosageValueInput(QLineEdit):
-    def __init__(self, placeholder, name, *args, **kwargs):
-        super(QLineEdit, self).__init__(*args, **kwargs)
-        self.setPlaceholderText(placeholder)
-        self.setObjectName(name)
-        self.setAlignment(Qt.AlignHCenter)
+        def build_r_staff():
+            elem = QFormLayout()
+            lbl = QLabel("Staff initials:")
+            self.txt_staff = TextInput(50, 100)
+            elem.addRow(lbl, self.txt_staff)
+            return elem
 
+        def build_r_buttons():
+            elem = QVBoxLayout()
+            self.btn_checklist = QPushButton("Admission Checklist", self)
+            self.btn_confidentiality = QPushButton(
+                "Confidentiality Waiver", self)
+            self.btn_property = QPushButton("Property Waiver", self)
+            self.btn_meds_in = QPushButton("Meds In", self)
+            self.btn_meds_out = QPushButton("Meds Out", self)
+            buttons = [self.btn_checklist, self.btn_confidentiality,
+                       self.btn_property, self.btn_meds_in, self.btn_meds_out]
+            elem.addWidget([btn for btn in buttons])
+            self.main_menu_buttons = QButtonGroup(self)
+            self.main_menu_buttons.addButton([btn for btn in buttons])
 
-class ComboBox(QComboBox):
-    def __init__(self, options=[], *args, **kwargs):
-        super(ComboBox, self).__init__(*args, **kwargs)
-        for opt in options:
-            self.addItem(opt)
+        # instantiate overall layout
+        wrapper = QVBoxLayout()
+        self.setLayout(wrapper)
 
+        # add r elements to wrapper
+        wrapper.addLayout(build_r_client())
+        wrapper.addLayout(build_r_staff())
+        wrapper.addLayout(build_r_buttons())
 
-class HeadedTable(QTableWidget):
-    def __init__(self, columns=[], *args, **kwargs):
-        super(QTableWidget, self).__init__(*args, **kwargs)
-        for column in columns:
-            c = TableColumnHeader(column)
-            self.setHorizontalHeaderItem(columns.index(column), c)
+    def init_connects(self):
+        # TODO: add MainMenu functionality
+        pass
 
-
-class TableColumnHeader(QTableWidgetItem):
-    def __init__(self, title, *args, **kwargs):
-        super(QTableWidgetItem, self).__init__(*args, **kwargs)
-        self.setText(title)
-
-
-# MAIN WIDGET
 
 class MedsInTool(QWidget):
     def __init__(self, *args, **kwargs):
         super(QWidget, self).__init__(*args, **kwargs)
         self.setWindowTitle("Medication In")
         self.build_UI()
+        self.init_connects()
 
     def build_UI(self):
         def build_r_header():
@@ -262,6 +302,65 @@ class MedsInTool(QWidget):
         wrapper.addLayout(build_r_header())
         wrapper.addLayout(build_r_tools_0())
 
+
+class MedsOutTool(QWidget):
+    def __init__(self, *args, **kwargs):
+        super(QWidget, self).__init__(*args, **kwargs)
+        self.build_UI()
+        self.init_connects()
+
+    def build_UI(self):
+        # TODO: build out MedsOutTool GUI
+        pass
+
+    def init_connects(self):
+        # TODO: add MedsOutTool functionality
+        pass
+
+
+class ChecklistTool(QWidget):
+    def __init__(self, *args, **kwargs):
+        super(QWidget, self).__init__(*args, **kwargs)
+        self.build_UI()
+        self.init_connects()
+
+    def build_UI(self):
+        # TODO: Build out ChecklistTool GUI
+        pass
+
+    def init_connects(self):
+        # TODO: Add ChecklistTool functionality
+        pass
+
+
+class ConfidentialityWaiverTool(QWidget):
+    def __init__(self, *args, **kwargs):
+        super(QWidget, self).__init__(*args, **kwargs)
+        self.build_UI()
+        self.init_connects()
+
+    def build_UI(self):
+        # TODO: build out ConfidentialityWaiverTool GUI
+        pass
+
+    def init_connects(self):
+        # TODO: add ConfidentialityWaiverTool functionality
+        pass
+
+
+class PropertyWaiverTool(QWidget):
+    def __init__(self, *args, **kwargs):
+        super(QWidget, self).__init__(*args, **kwargs)
+        self.build_UI()
+        self.init_connects()
+
+    def build_UI(self):
+        # TODO: build out PropertyWaiverTool GUI
+        pass
+
+    def init_connects(self):
+        # TODO: add PropertyWaiverTool functionality
+        pass
 
 # APP
 
