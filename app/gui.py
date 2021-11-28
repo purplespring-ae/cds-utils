@@ -16,6 +16,7 @@ from custom_widgets import *
 class MainMenu(QWidget):
     def __init__(self, *args, **kwargs):
         super(QWidget, self).__init__(*args, **kwargs)
+        self.setWindowTitle("CDS Utilities - Main Menu")
         self.build_UI()
         self.init_connects()
 
@@ -25,36 +26,37 @@ class MainMenu(QWidget):
         def build_r_client():
             elem = QVBoxLayout()
             # - name
-            row = QHBoxLayout()
+            row_name = QHBoxLayout()
             lbl = QLabel("Name")
             self.txt_client_fname = TextInput(100, 200, "First name")
             self.txt_client_sname = TextInput(100, 200, "Surname")
-            row.addWidget(lbl)
-            row.addWidget(self.txt_client_fname)
-            row.addWidget(self.txt_client_sname)
-            elem.addLayout(row)
+            row_name.addWidget(lbl)
+            row_name.addWidget(self.txt_client_fname)
+            row_name.addWidget(self.txt_client_sname)
+            elem.addLayout(row_name)
             # - DOB
-            row = QHBoxLayout()
+            row_dob = QHBoxLayout()
             lbl = QLabel("Date of Birth")
             self.txt_dob_d = TextInput(50, 100, "DD")
             self.txt_dob_m = TextInput(50, 100, "MM")
             self.txt_dob_y = TextInput(50, 100, "YY")
-            row.addWidget(lbl)
-            row.addWidget(self.txt_dob_d)
-            row.addWidget(self.txt_dob_m)
-            row.addWidget(self.txt_dob_y)
-            elem.addLayout(row)
+            row_dob.addWidget(lbl)
+            row_dob.addWidget(self.txt_dob_d)
+            row_dob.addWidget(self.txt_dob_m)
+            row_dob.addWidget(self.txt_dob_y)
+            elem.addLayout(row_dob)
             # - DOA
-            row = QHBoxLayout()
+            row_doa = QHBoxLayout()
             lbl = QLabel("Date of Admission")
             self.txt_doa_d = TextInput(50, 100, "DD")
             self.txt_doa_m = TextInput(50, 100, "MM")
             self.txt_doa_y = TextInput(50, 100, "YY")
-            row.addWidget(lbl)
-            row.addWidget(self.txt_doa_d)
-            row.addWidget(self.txt_doa_m)
-            row.addWidget(self.txt_doa_y)
-            elem.addLayout(row)
+            row_doa.addWidget(lbl)
+            row_doa.addWidget(self.txt_doa_d)
+            row_doa.addWidget(self.txt_doa_m)
+            row_doa.addWidget(self.txt_doa_y)
+            elem.addLayout(row_doa)
+            return elem
 
         def build_r_staff():
             elem = QFormLayout()
@@ -71,11 +73,13 @@ class MainMenu(QWidget):
             self.btn_property = QPushButton("Property Waiver", self)
             self.btn_meds_in = QPushButton("Meds In", self)
             self.btn_meds_out = QPushButton("Meds Out", self)
+            self.main_menu_buttons = QButtonGroup(self)
             buttons = [self.btn_checklist, self.btn_confidentiality,
                        self.btn_property, self.btn_meds_in, self.btn_meds_out]
-            elem.addWidget([btn for btn in buttons])
-            self.main_menu_buttons = QButtonGroup(self)
-            self.main_menu_buttons.addButton([btn for btn in buttons])
+            for btn in buttons:
+                elem.addWidget(btn)
+                self.main_menu_buttons.addButton(btn)
+            return elem
 
         # instantiate overall layout
         wrapper = QVBoxLayout()
@@ -302,6 +306,9 @@ class MedsInTool(QWidget):
         wrapper.addLayout(build_r_header())
         wrapper.addLayout(build_r_tools_0())
 
+    def init_connects(self):
+        pass
+
 
 class MedsOutTool(QWidget):
     def __init__(self, *args, **kwargs):
@@ -367,7 +374,7 @@ class PropertyWaiverTool(QWidget):
 
 def main():
     app = QApplication(sys.argv)
-    window = MedsInTool()
+    window = MainMenu()
     window.show()
     app.exec_()
 
