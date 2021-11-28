@@ -251,6 +251,7 @@ class MedsInTool(QWidget):
                 elem = QHBoxLayout()
                 self.btn_reset = QPushButton("Reset")
                 self.btn_submit = QPushButton("Submit")
+                self.btn_submit.setEnabled(False)
                 elem.addWidget(self.btn_reset)
                 elem.addWidget(self.btn_submit)
                 return elem
@@ -307,7 +308,83 @@ class MedsInTool(QWidget):
         wrapper.addLayout(build_r_tools_0())
 
     def init_connects(self):
+        def connect_radios():
+            pass
+
+        def connect_txt_inputs():
+            self.exclusive_txt_inputs = [
+                self.txt_i1, self.txt_n1, self.txt_i2, self.txt_n2, self.txt_custom_dosage]
+            for txt in self.exclusive_txt_inputs:
+                txt.textChanged.connect(
+                    lambda: self.ev_option_dosage_changed())
+
+        def connect_buttons():
+            pass
+
+        connect_radios()
+        connect_txt_inputs()
+        connect_buttons()
+
+    # EVENT HANDLERS
+    def ev_option_dosage_changed(self):
+        # TODO: disable submit button to force re-validation
+        # TODO: clear & disable txtinputs for unselected options
         pass
+
+    def ev_btn_validate_clicked(self):
+        valid_data = {
+            "name": False,
+            "strength": False,
+            "qty": False,
+            "n": False,
+            "i": False
+        }
+        # validate med name
+        if self.txt_name.text():
+            valid_data.update({"name": True})
+        # validate med strength
+        if self.txt_strength.text():
+            valid_data.update({"strength": True})
+        # validate dosage
+        opt_str = self.dosage_options.checkedButton().statusTip(
+        ) if self.dosage_options.checkedButton() else ""
+        if "[n]" in opt_str or "[i]" in opt_str:
+            # active_n and active_i are needed, get which ones
+            for txt in self.list_exclusive_txt_inputs:
+                if txt.isEnabled() and txt.text():
+                    valid_data.update({txt.objectName()[-1:]: True})
+                elif txt.isEnabled():
+                    valid_data.update({txt.objectName()[-1:]: False})
+        elif self.dosage_options.checkedButton():
+            # option 3 or 4. no text fields to validate so pass automatically
+            valid_data.update({"n": True})
+            valid_data.update({"i": True})
+        else:
+            # no dosage selected, fail validation
+            return False
+        # validate qty in
+        if self.txt_qty.text():
+            valid_data.update({"qty": True})
+        # aggregate validation
+        print(valid_data)
+        if False not in valid_data.values():
+            self.btn_submit.setEnabled(True)
+        else:
+            # TODO: Indicate validation issues to user
+            return False
+
+    def ev_btn_reset_clicked(self):
+        pass
+
+    def ev_btn_submit_clicked(self):
+        self.ev_btn_validate_clicked()  # force re-validation
+        export_values = {
+            0: self.txt_name.text(),
+            1: self.txt_strength.text() + self.cbo_strength_unit.currentText(),
+            2: self.txt_qty.text(),
+            3: self.dosage_statement.text()
+        }
+        print(export_values)
 
 
 class MedsOutTool(QWidget):
@@ -374,7 +451,7 @@ class PropertyWaiverTool(QWidget):
 
 def main():
     app = QApplication(sys.argv)
-    window = MainMenu()
+    window = MedsInTool()
     window.show()
     app.exec_()
 
